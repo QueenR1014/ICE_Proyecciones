@@ -1,6 +1,6 @@
 import pandas as pd
 import matplotlib.pyplot as plt
-
+from graphic_rates import colors
 # 1. Leer archivo (ahora SÍ tiene header)
 data = pd.read_excel('datos_graficos.xlsx')
 
@@ -22,8 +22,8 @@ df = df.apply(pd.to_numeric, errors='coerce')
 # 7. Graficar
 plt.figure()
 
-for col in df.columns:
-    plt.plot(df.index, df[col], label=col)
+for i, col in enumerate(df.columns):
+    plt.plot(df.index, df[col], label=col, color=colors[i % len(colors)], linewidth=2)
 
 plt.xlabel('Años')
 plt.ylabel('PIB real')
@@ -36,8 +36,8 @@ plt.show()
 df_last10 = df.tail(8)
 plt.figure()
 
-for col in df_last10.columns:
-    plt.plot(df_last10.index, df_last10[col], label=col)
+for i, col in enumerate(df_last10.columns):
+    plt.plot(df_last10.index, df_last10[col], label=col, color=colors[i % len(colors)], linewidth=2)
 
 plt.xlabel('Años')
 plt.ylabel('PIB real')

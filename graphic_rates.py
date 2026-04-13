@@ -1,47 +1,46 @@
 import pandas as pd
 import matplotlib.pyplot as plt
 import numpy as np
-
-# 🔥 clave: decimal=","
+import matplotlib.ticker as mtick
 data = pd.read_excel('datos_graficos.xlsx', sheet_name="tasas", decimal=',')
-
-# 🔥 limpiar nombres de columnas
-data.columns = data.columns.str.strip()
-
-print(data.columns)  # para verificar
-
-df = data.set_index('Sector')
-# 1. Usar "Sector" como índice
-df = data.set_index('Sector')
-
-# 2. Transponer (AHORA sí tiene sentido)
-df = df.T
-
-# 3. Asegurar que el índice (años) sea numérico
+variables = data.iloc[:, 0]
+df = data.iloc[:, 1:].T
+df.columns = variables
 df.index = df.index.astype(int)
+df = df.apply(pd.to_numeric, errors='coerce')
 
-print(df.shape)      # debería ser (11, 4)
-print(df.columns)    # las 4 variables
+# 🎨 Custom color palette (add more if needed)
+colors = ['#8475e0', '#f89c49', '#f51e92', '#77ccc7', '#F6C85F', '#6B5B95']
 
-# --- gráfica ---
-df = df.tail(10)
-
-x = np.arange(len(df.index))
-width = 0.2
-n = len(df.columns)
-
-plt.figure()
+plt.figure(figsize=(10, 6))
 
 for i, col in enumerate(df.columns):
-    plt.bar(x + (i - n/2)*width + width/2, df[col], width=width, label=col)
+    plt.plot(df.index, df[col], label=col, color=colors[i % len(colors)], linewidth=2)
+    
+    # subtle value labels
+    for x, y in zip(df.index, df[col]):
+        plt.text(x, y, f'{y*100:.3f}%', fontsize=7, ha='center', va='bottom', alpha=0.7)
 
-plt.xticks(x, df.index, rotation=45)
+# Labels & title
+plt.xlabel('Año', fontsize=11)
+plt.ylabel('Tasa de Crecimiento Inercial', fontsize=11)
+plt.title('Crecimiento de Variables', fontsize=13, weight='bold')
 
-plt.xlabel("Año")
-plt.ylabel("Tasa de Crecimiento")
-plt.title("Tasas de Crecimiento del PIB por escenario y tipo")
-plt.axhline(0)  # 🔥 muy útil para tasas
+# Minimalist grid (only horizontal)
+plt.grid(axis='y', linestyle='--', linewidth=0.6, alpha=0.5)
 
-plt.legend()
+# Remove top/right borders
+ax = plt.gca()
+ax.spines['top'].set_visible(False)
+ax.spines['right'].set_visible(False)
+
+# Keep clean ticks
+plt.xticks(df.index, fontsize=9)
+plt.yticks(fontsize=9)
+
+# Clean legend
+plt.legend(frameon=False, fontsize=9)
+
+plt.gca().yaxis.set_major_formatter(mtick.PercentFormatter(1))
 plt.tight_layout()
 plt.show()
